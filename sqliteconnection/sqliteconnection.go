@@ -10,12 +10,19 @@ type sqliteConnectionManager struct {
 	connection.Manager
 }
 
-// NewConnectionManager creates an instance of the SQLite implementation of the Manager interface.
-func NewConnectionManager(dbname string, config *gorm.Config) connection.Manager {
+// MustNewConnectionManager creates an instance of the SQLite implementation of the Manager interface.
+func MustNewConnectionManager(dbname string, config *gorm.Config) connection.Manager {
 	dialector := sqlite.Open(dbname)
+	return connection.MustNewBaseConnectionManager(dbname, dialector, config)
+}
+
+// NewConnectionManager creates an instance of the SQLite implementation of the Manager interface.
+func NewConnectionManager(dbname string, config *gorm.Config) (connection.Manager, error) {
+	dialector := sqlite.Open(dbname)
+	conn, err := connection.NewBaseConnectionManager(dbname, dialector, config)
 	m := &sqliteConnectionManager{
-		Manager: connection.NewBaseConnectionManager(dbname, dialector, config),
+		Manager: conn,
 	}
 
-	return m
+	return m, err
 }
